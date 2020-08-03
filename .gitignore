@@ -1,0 +1,42 @@
+#java ignore
+# Compiled class file
+*.class
+
+# Log file
+*.log
+**/log
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+# go ignore
+**/vendor
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+
+#idea ignore
+**/.idea
+
+# vscode
+**/.vscode
+# rust ignore
+Cargo.lock
+**/target
+**/*.rs.bk
+
+
