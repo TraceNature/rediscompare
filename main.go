@@ -17,7 +17,7 @@ package main
 
 import (
 	"fmt"
-	"interactioncli/interact"
+	"rediscompare/interact"
 	"io/ioutil"
 	"os"
 	"os/signal"

@@ -7,9 +7,9 @@ import (
 	"github.com/mattn/go-shellwords"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/TraceNature/rediscompare/check"
-	"github.com/TraceNature/rediscompare/cmd"
-	"github.com/TraceNature/rediscompare/commons"
+	"rediscompare/check"
+	"rediscompare/cmd"
+	"rediscompare/commons"
 	"io"
 	"os"
 	"strings"
@@ -63,21 +63,6 @@ var suggest = []prompt.Suggest{
 
 var readlinecompleter *readline.PrefixCompleter
 
-//var readlinecompleter = readline.NewPrefixCompleter(
-//	readline.PcItem("task",
-//		readline.PcItem("create"),
-//		readline.PcItem("start",
-//			readline.PcItem("--afresh")),
-//		readline.PcItem("stop"),
-//		readline.PcItem("remove"),
-//		readline.PcItem("status",
-//			readline.PcItem("all"),
-//			readline.PcItem("byname"),
-//			readline.PcItem("bytaskid"),
-//			readline.PcItem("bygroupid")),
-//	),
-//)
-
 func init() {
 	cobra.EnablePrefixMatching = true
 	cobra.OnInitialize(initConfig)
@@ -108,16 +93,15 @@ func cliRun(cmd *cobra.Command, args []string) {
 func getBasicCmd() *cobra.Command {
 
 	rootCmd := &cobra.Command{
-		Use:   "redissyncer-cli",
-		Short: "redissyncer command line interface",
+		Use:   "rediscompare",
+		Short: "rediscompare command line interface",
 		Long:  "",
 	}
 
 	rootCmd.PersistentFlags().BoolVarP(&commandFlags.Help, "help", "h", false, "help message")
 
 	rootCmd.AddCommand(
-		cmd.NewConfigCommand(),
-		cmd.NewTaskCommand(),
+		cmd.NewResultCommand(),
 		cmd.NewCompareCommand(),
 	)
 
@@ -234,7 +218,7 @@ func initConfig() {
 func loop() {
 	rl, err := readline.NewEx(&readline.Config{
 		//Prompt:            "\033[31m»\033[0m ",
-		Prompt:                 "redissyncer-cli>",
+		Prompt:                 "rediscompare-cli>",
 		HistoryFile:            "/tmp/readline.tmp",
 		AutoComplete:           readlinecompleter,
 		DisableAutoSaveHistory: true,

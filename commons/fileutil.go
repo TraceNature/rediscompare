@@ -4,13 +4,15 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 )
 
 //AppendLineToFile 向文件追加行
-func AppendLineToFile(line bytes.Buffer, filename string) {
-
+func AppendLineToFile(line *bytes.Buffer, filename string) {
+	lock.Lock()
+	defer lock.Unlock()
 	f, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		panic(err)
@@ -51,4 +53,33 @@ func IsDir(path string) bool {
 //IsFile 判断所给路径是否为文件
 func IsFile(path string) bool {
 	return !IsDir(path)
+}
+
+//复制文件
+func CopyFile(src string, dst string, buffersize int) error {
+	buf := make([]byte, buffersize)
+	source, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer source.Close()
+	destination, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer destination.Close()
+	for {
+		n, err := source.Read(buf)
+		if err != nil && err != io.EOF {
+			return err
+		}
+		if n == 0 {
+			break
+		}
+
+		if _, err := destination.Write(buf[:n]); err != nil {
+			return err
+		}
+	}
+	return nil
 }
