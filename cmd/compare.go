@@ -228,7 +228,10 @@ func single2singleCommandFunc(cmd *cobra.Command, args []string) {
 		Report:       report,
 		Scenario:     Scenario_single2single,
 	}
-	rc.Single2Single()
+	err := rc.Single2Single()
+	if err != nil {
+		cmd.PrintErrln(err)
+	}
 }
 
 func multisingle2singleCommandFunc(cmd *cobra.Command, args []string) {
