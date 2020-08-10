@@ -6,6 +6,9 @@
 *.log
 **/log
 
+# example yaml files dir
+**/execyaml
+
 # BlueJ files
 *.ctxt
 

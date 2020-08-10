@@ -1,0 +1,21 @@
+saddr:
+  - addr: "114.67.67.7:6379"
+    password: "redistest0102"
+    dbs:
+      - 0
+      - 2
+      - 3
+  - addr: "114.67.83.163:6379"
+    password: "redistest0102"
+    dbs:
+      - 1
+      - 5
+      - 9
+taddr: "114.67.100.239:6379"
+tpassword: "redistest0102"
+batchsize: 30
+threads: 2
+ttldiff: 10000
+comparetimes: 3
+report:  true
+scenario: "multisingle2single"

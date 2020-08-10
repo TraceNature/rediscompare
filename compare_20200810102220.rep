@@ -1,0 +1,1 @@
+[{"BatchSize":50,"CompareThreads":0,"RecordResult":true,"ResultFile":"./compare_1597026140067917170.result","Source":"114.67.67.7:6379","SourceDB":0,"TTLDiff":10000,"Target":"114.67.83.163:6379","TargetDB":0}]
