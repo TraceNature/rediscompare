@@ -40,7 +40,7 @@ cd rediscompare
 go mod tidy
 go mod vendor
 
-go build go build -o rediscompare
+go build -o rediscompare
 ```
 
 ### 使用范例
