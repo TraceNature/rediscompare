@@ -9,6 +9,9 @@
 # example yaml files dir
 **/execyaml
 
+# result or report file
+compare_*
+
 # BlueJ files
 *.ctxt
 

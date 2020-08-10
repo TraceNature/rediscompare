@@ -2,6 +2,8 @@
 
 rediscompare 是用来对比redis 数据库数据一致性的命令行工具
 
+![showuse](./docs/images/use.gif)
+
 ## 校验机制
 
 rediscompare 通过scan 命令扫描源库中的左右数据依次与目标数据库进行比较，从value长度、value值、ttl等维度进行核对。最后生成result文件，文件中包含数据不一致的key已经原因。
