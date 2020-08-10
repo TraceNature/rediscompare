@@ -352,9 +352,9 @@ func cluster2clusterCommandFunc(cmd *cobra.Command, args []string) {
 func (rc *RedisCompare) Execute() error {
 	switch rc.Scenario {
 	case Scenario_single2single:
-		rc.Single2Single()
+		return rc.Single2Single()
 	case Scenario_single2cluster:
-		rc.Single2Cluster()
+		return rc.Single2Cluster()
 	case Scenario_cluster2cluster:
 		return rc.Cluster2Cluster()
 	case Scenario_multisingle2single:
@@ -441,7 +441,7 @@ func (rc *RedisCompare) Single2Single() error {
 	//生成报告
 	if rc.Report {
 		GenReport([]string{compare.ResultFile}, compares)
-		
+
 	}
 	return nil
 }
