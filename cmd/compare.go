@@ -265,7 +265,11 @@ func multisingle2singleCommandFunc(cmd *cobra.Command, args []string) {
 		Report:       report,
 		Scenario:     Scenario_multisingle2single,
 	}
-	rc.MultiSingle2Single()
+	err := rc.MultiSingle2Single()
+
+	if err != nil {
+		cmd.Println(err)
+	}
 }
 
 func single2clusterCommandFunc(cmd *cobra.Command, args []string) {
@@ -301,7 +305,11 @@ func single2clusterCommandFunc(cmd *cobra.Command, args []string) {
 		Report:       report,
 		Scenario:     Scenario_single2cluster,
 	}
-	rc.Single2Cluster()
+
+	err := rc.Single2Cluster()
+	if err != nil {
+		cmd.Println(err)
+	}
 }
 
 func cluster2clusterCommandFunc(cmd *cobra.Command, args []string) {

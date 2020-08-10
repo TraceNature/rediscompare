@@ -218,7 +218,7 @@ func initConfig() {
 func loop() {
 	rl, err := readline.NewEx(&readline.Config{
 		//Prompt:            "\033[31m»\033[0m ",
-		Prompt:                 "rediscompare-cli>",
+		Prompt:                 "rediscompare-cli> ",
 		HistoryFile:            "/tmp/readline.tmp",
 		AutoComplete:           readlinecompleter,
 		DisableAutoSaveHistory: true,
@@ -259,7 +259,7 @@ func loop() {
 		}
 		cmd := strings.Join(cmds, " ")
 		cmds = cmds[:0]
-		rl.SetPrompt("redissyncer-cli> ")
+		rl.SetPrompt("rediscompare-cli> ")
 		rl.SaveHistory(cmd)
 
 		args, err := shellwords.Parse(cmd)

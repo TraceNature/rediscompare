@@ -7,6 +7,12 @@ import (
 )
 
 func TestCompare_CompareDB(t *testing.T) {
+	sopt := &redis.Options{
+		Addr: "114.67.67.7:6379",
+		DB:   0,
+	}
+	
+	sclient := commons.GetGoRedisClient(sopt)
 
 }
 
