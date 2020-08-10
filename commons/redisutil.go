@@ -16,19 +16,18 @@ func GetGoRedisConn(opt *redis.Options) *redis.Conn {
 }
 
 //redisserver联通性校验
-func CheckRedisClientConnect(r *redis.Client) bool {
+func CheckRedisClientConnect(r *redis.Client) error {
 	_, err := r.Ping().Result()
 	if err != nil {
-		return false
+		return err
 	}
-	return true
+	return nil
 }
 
-func CheckRedisClusterClientConnect(r *redis.ClusterClient) bool {
+func CheckRedisClusterClientConnect(r *redis.ClusterClient) error {
 	_, err := r.Ping().Result()
 	if err != nil {
-
-		return false
+		return err
 	}
-	return true
+	return nil
 }

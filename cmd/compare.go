@@ -14,7 +14,6 @@ import (
 	"rediscompare/commons"
 	"rediscompare/compare"
 	"rediscompare/globalzap"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -228,6 +227,8 @@ func single2singleCommandFunc(cmd *cobra.Command, args []string) {
 		Report:       report,
 		Scenario:     Scenario_single2single,
 	}
+
+	zaplogger.Sugar().Info(rc)
 	err := rc.Single2Single()
 	if err != nil {
 		cmd.PrintErrln(err)
@@ -268,6 +269,7 @@ func multisingle2singleCommandFunc(cmd *cobra.Command, args []string) {
 		Report:       report,
 		Scenario:     Scenario_multisingle2single,
 	}
+
 	err := rc.MultiSingle2Single()
 
 	if err != nil {
@@ -414,11 +416,15 @@ func (rc *RedisCompare) Single2Single() error {
 	defer tclient.Close()
 
 	//check redis 连通性
-	if !commons.CheckRedisClientConnect(sclient) {
-		return errors.New("Cannot connect source redis")
+	sconnerr := commons.CheckRedisClientConnect(sclient)
+	if sconnerr != nil {
+
+		return sconnerr
 	}
-	if !commons.CheckRedisClientConnect(tclient) {
-		return errors.New("Cannot connect source redis")
+
+	tconnerr := commons.CheckRedisClientConnect(tclient)
+	if tconnerr != nil {
+		return tconnerr
 	}
 
 	//删除目录下上次运行时临时产生的result文件
@@ -458,7 +464,6 @@ func (rc *RedisCompare) Single2Single() error {
 }
 
 func (rc *RedisCompare) Single2Cluster() error {
-
 	if len(rc.Saddr) == 0 {
 		return errors.New("No saddrs")
 	}
@@ -493,12 +498,13 @@ func (rc *RedisCompare) Single2Cluster() error {
 	defer tclient.Close()
 
 	//check redis 连通性
-	if !commons.CheckRedisClientConnect(sclient) {
-		return errors.New("Cannot connect source redis")
-
+	sconnerr := commons.CheckRedisClientConnect(sclient)
+	if sconnerr != nil {
+		return sconnerr
 	}
-	if !commons.CheckRedisClusterClientConnect(tclient) {
-		return errors.New("Cannot connect source redis")
+	tconnerr := commons.CheckRedisClusterClientConnect(tclient)
+	if tconnerr != nil {
+		return tconnerr
 	}
 
 	//删除目录下上次运行时临时产生的result文件
@@ -581,15 +587,16 @@ func (rc *RedisCompare) MultiSingle2Single() error {
 
 	defer tclient.Close()
 
+	//check redis 连通性
 	for _, v := range sclients {
-		//check redis 连通性
-		if !commons.CheckRedisClientConnect(v) {
-			return errors.New("Cannot connect source redis: " + v.Options().Addr + "|" + strconv.Itoa(v.Options().DB))
+		sconnerr := commons.CheckRedisClientConnect(v)
+		if sconnerr != nil {
+			return sconnerr
 		}
 	}
-
-	if !commons.CheckRedisClientConnect(tclient) {
-		return errors.New("Cannot connect source redis")
+	tconnerr := commons.CheckRedisClientConnect(tclient)
+	if tconnerr != nil {
+		return tconnerr
 	}
 
 	//删除目录下上次运行时临时产生的result文件
@@ -676,16 +683,16 @@ func (rc *RedisCompare) MultiSingle2Cluster() error {
 	tclient := redis.NewClusterClient(topt)
 	defer tclient.Close()
 
+	//check redis 连通性
 	for _, v := range sclients {
-		//check redis 连通性
-		if !commons.CheckRedisClientConnect(v) {
-			return errors.New("Cannot connect source redis")
+		sconnerr := commons.CheckRedisClientConnect(v)
+		if sconnerr != nil {
+			return sconnerr
 		}
 	}
-
-	if !commons.CheckRedisClusterClientConnect(tclient) {
-		//cmd.PrintErrln(errors.New("Cannot connect target redis"))
-		return errors.New("Cannot connect source redis")
+	tconnerr := commons.CheckRedisClusterClientConnect(tclient)
+	if tconnerr != nil {
+		return tconnerr
 	}
 
 	//删除目录下上次运行时临时产生的result文件
@@ -769,15 +776,16 @@ func (rc *RedisCompare) Cluster2Cluster() error {
 	tclient := redis.NewClusterClient(topt)
 	defer tclient.Close()
 
+	//check redis 连通性
 	for _, v := range sclients {
-		//check redis 连通性
-		if !commons.CheckRedisClientConnect(v) {
-			return errors.New("Cannot connect source redis")
+		sconnerr := commons.CheckRedisClientConnect(v)
+		if sconnerr != nil {
+			return sconnerr
 		}
 	}
-
-	if !commons.CheckRedisClusterClientConnect(tclient) {
-		return errors.New("Cannot connect source redis")
+	tconnerr := commons.CheckRedisClusterClientConnect(tclient)
+	if tconnerr != nil {
+		return tconnerr
 	}
 
 	//删除目录下上次运行时临时产生的result文件
