@@ -34,18 +34,19 @@ type SAddr struct {
 	Dbs      []int
 }
 type RedisCompare struct {
-	Saddr        []SAddr `json:"saddr"`
-	Taddr        string  `json:"taddr"`
-	Spassword    string  `json:"spassword"`
-	Tpassword    string  `json:"tpassword"`
-	Sdb          int     `json:"sdb"`
-	Tdb          int     `json:"tdb"`
-	BatchSize    int     `json:"batchsize"`
-	Threads      int     `json:"threads"`
-	TTLdiff      int     `json:"ttldiff"`
-	CompareTimes int     `json:"comparetimes"`
-	Report       bool    `json:"report"`
-	Scenario     string  `json:"scenario"`
+	Saddr           []SAddr `json:"saddr"`
+	Taddr           string  `json:"taddr"`
+	Spassword       string  `json:"spassword"`
+	Tpassword       string  `json:"tpassword"`
+	Sdb             int     `json:"sdb"`
+	Tdb             int     `json:"tdb"`
+	BatchSize       int     `json:"batchsize"`
+	Threads         int     `json:"threads"`
+	TTLdiff         int     `json:"ttldiff"`
+	CompareTimes    int     `json:"comparetimes"`
+	CompareInterval int     `json:"compareinterval"`
+	Report          bool    `json:"report"`
+	Scenario        string  `json:"scenario"`
 }
 
 func NewCompareCommand() *cobra.Command {
@@ -89,6 +90,7 @@ func NewSingle2SingleCommand() *cobra.Command {
 	sc.Flags().Int("threads", 0, "Compare threads default is cpu core number")
 	sc.Flags().Int("ttldiff", 10000, "Diffrent of TTL,Allowed max ttl microseconds default is 10000 as ten seconds")
 	sc.Flags().Int("comparetimes", 1, "compare loop times,default is 1")
+	sc.Flags().Int("compareinterval", 1, "compare loop interval,default is 1 second")
 	sc.Flags().Bool("report", false, "whether generate report default is false")
 	return sc
 
@@ -111,6 +113,7 @@ func NewSingle2ClusterCommand() *cobra.Command {
 	sc.Flags().Int("threads", 0, "Compare threads default is cpu core number")
 	sc.Flags().Int("ttldiff", 10000, "Diffrent of TTL,Allowed max ttl microseconds default is 10000 as ten seconds")
 	sc.Flags().Int("comparetimes", 1, "compare loop times,default is 1")
+	sc.Flags().Int("compareinterval", 1, "compare loop interval,default is 1 second")
 	sc.Flags().Bool("report", false, "whether generate report default is false")
 	return sc
 
@@ -132,6 +135,7 @@ func NewMultiSingle2SingleCommand() *cobra.Command {
 	sc.Flags().Int("threads", 0, "Compare threads default is cpu core number")
 	sc.Flags().Int("ttldiff", 10000, "Diffrent of TTL,Allowed max ttl microseconds default is 10000 as ten seconds")
 	sc.Flags().Int("comparetimes", 1, "compare loop times,default is 1")
+	sc.Flags().Int("compareinterval", 1, "compare loop interval,default is 1 second")
 	sc.Flags().Bool("report", false, "whether generate report default is false")
 	return sc
 }
@@ -154,19 +158,13 @@ func NewCluster2ClusterCommand() *cobra.Command {
 	sc.Flags().Int("threads", 0, "Compare threads default is cpu core number")
 	sc.Flags().Int("ttldiff", 10000, "Diffrent of TTL,Allowed max ttl microseconds default is 10000 as ten seconds")
 	sc.Flags().Int("comparetimes", 1, "compare loop times,default is 1")
+	sc.Flags().Int("compareinterval", 1, "compare loop interval,default is 1 second")
 	sc.Flags().Bool("report", false, "whether generate report default is false")
 	return sc
 
 }
 
 func executeCommandFunc(cmd *cobra.Command, args []string) {
-	//v := viper.New()
-	//v.SetConfigType("yaml") // 设置配置文件的类型
-	//v.SetConfigFile("./execyaml/multisingle2single.yml")
-	//v.ReadInConfig()
-	//
-	//cmd.Println(v.Get(`Saddr`))
-
 	if len(args) != 1 {
 		cmd.PrintErrln(errors.New("Must input execute file path"))
 		return
@@ -205,6 +203,7 @@ func single2singleCommandFunc(cmd *cobra.Command, args []string) {
 	threas, _ := cmd.Flags().GetInt("threads")
 	ttldiff, _ := cmd.Flags().GetInt("ttldiff")
 	comparetimes, _ := cmd.Flags().GetInt("comparetimes")
+	compareinterval, _ := cmd.Flags().GetInt("compareinterval")
 	report, _ := cmd.Flags().GetBool("report")
 
 	saddrstruct := SAddr{
@@ -214,18 +213,19 @@ func single2singleCommandFunc(cmd *cobra.Command, args []string) {
 	}
 
 	rc := RedisCompare{
-		Saddr:        []SAddr{saddrstruct},
-		Taddr:        taddr,
-		Spassword:    spassword,
-		Tpassword:    tpassword,
-		Sdb:          sdb,
-		Tdb:          tdb,
-		BatchSize:    batchsize,
-		Threads:      threas,
-		TTLdiff:      ttldiff,
-		CompareTimes: comparetimes,
-		Report:       report,
-		Scenario:     Scenario_single2single,
+		Saddr:           []SAddr{saddrstruct},
+		Taddr:           taddr,
+		Spassword:       spassword,
+		Tpassword:       tpassword,
+		Sdb:             sdb,
+		Tdb:             tdb,
+		BatchSize:       batchsize,
+		Threads:         threas,
+		TTLdiff:         ttldiff,
+		CompareTimes:    comparetimes,
+		CompareInterval: compareinterval,
+		Report:          report,
+		Scenario:        Scenario_single2single,
 	}
 
 	zaplogger.Sugar().Info(rc)
@@ -247,6 +247,7 @@ func multisingle2singleCommandFunc(cmd *cobra.Command, args []string) {
 	threas, _ := cmd.Flags().GetInt("threads")
 	ttldiff, _ := cmd.Flags().GetInt("ttldiff")
 	comparetimes, _ := cmd.Flags().GetInt("comparetimes")
+	compareinterval, _ := cmd.Flags().GetInt("compareinterval")
 	report, _ := cmd.Flags().GetBool("report")
 
 	saddrstruct := SAddr{
@@ -256,18 +257,19 @@ func multisingle2singleCommandFunc(cmd *cobra.Command, args []string) {
 	}
 
 	rc := RedisCompare{
-		Saddr:        []SAddr{saddrstruct},
-		Taddr:        taddr,
-		Spassword:    spassword,
-		Tpassword:    tpassword,
-		Sdb:          sdb,
-		Tdb:          tdb,
-		BatchSize:    batchsize,
-		Threads:      threas,
-		TTLdiff:      ttldiff,
-		CompareTimes: comparetimes,
-		Report:       report,
-		Scenario:     Scenario_multisingle2single,
+		Saddr:           []SAddr{saddrstruct},
+		Taddr:           taddr,
+		Spassword:       spassword,
+		Tpassword:       tpassword,
+		Sdb:             sdb,
+		Tdb:             tdb,
+		BatchSize:       batchsize,
+		Threads:         threas,
+		TTLdiff:         ttldiff,
+		CompareTimes:    comparetimes,
+		CompareInterval: compareinterval,
+		Report:          report,
+		Scenario:        Scenario_multisingle2single,
 	}
 
 	err := rc.MultiSingle2Single()
@@ -288,6 +290,7 @@ func single2clusterCommandFunc(cmd *cobra.Command, args []string) {
 	threas, _ := cmd.Flags().GetInt("threads")
 	ttldiff, _ := cmd.Flags().GetInt("ttldiff")
 	comparetimes, _ := cmd.Flags().GetInt("comparetimes")
+	compareinterval, _ := cmd.Flags().GetInt("compareinterval")
 	report, _ := cmd.Flags().GetBool("report")
 
 	saddrstruct := SAddr{
@@ -303,12 +306,13 @@ func single2clusterCommandFunc(cmd *cobra.Command, args []string) {
 		Tpassword: tpassword,
 		Sdb:       sdb,
 		//Tdb:          tdb,
-		BatchSize:    batchsize,
-		Threads:      threas,
-		TTLdiff:      ttldiff,
-		CompareTimes: comparetimes,
-		Report:       report,
-		Scenario:     Scenario_single2cluster,
+		BatchSize:       batchsize,
+		Threads:         threas,
+		TTLdiff:         ttldiff,
+		CompareTimes:    comparetimes,
+		CompareInterval: compareinterval,
+		Report:          report,
+		Scenario:        Scenario_single2cluster,
 	}
 
 	err := rc.Single2Cluster()
@@ -328,6 +332,7 @@ func cluster2clusterCommandFunc(cmd *cobra.Command, args []string) {
 	threas, _ := cmd.Flags().GetInt("threads")
 	ttldiff, _ := cmd.Flags().GetInt("ttldiff")
 	comparetimes, _ := cmd.Flags().GetInt("comparetimes")
+	compareinterval, _ := cmd.Flags().GetInt("compareinterval")
 	report, _ := cmd.Flags().GetBool("report")
 
 	saddrs := strings.Split(saddr, ",")
@@ -349,12 +354,13 @@ func cluster2clusterCommandFunc(cmd *cobra.Command, args []string) {
 		Tpassword: tpassword,
 		//Sdb:       sdb,
 		//Tdb:          tdb,
-		BatchSize:    batchsize,
-		Threads:      threas,
-		TTLdiff:      ttldiff,
-		CompareTimes: comparetimes,
-		Report:       report,
-		Scenario:     Scenario_cluster2cluster,
+		BatchSize:       batchsize,
+		Threads:         threas,
+		TTLdiff:         ttldiff,
+		CompareTimes:    comparetimes,
+		CompareInterval: compareinterval,
+		Report:          report,
+		Scenario:        Scenario_cluster2cluster,
 	}
 	execerr := rc.Cluster2Cluster()
 	if execerr != nil {
@@ -418,7 +424,6 @@ func (rc *RedisCompare) Single2Single() error {
 	//check redis 连通性
 	sconnerr := commons.CheckRedisClientConnect(sclient)
 	if sconnerr != nil {
-
 		return sconnerr
 	}
 
@@ -447,6 +452,7 @@ func (rc *RedisCompare) Single2Single() error {
 	compare.CompareDB()
 
 	for i := 0; i < rc.CompareTimes-1; i++ {
+		time.Sleep(time.Duration(rc.CompareInterval) * time.Second)
 		compare.CompareKeysFromResultFile([]string{compare.ResultFile})
 	}
 
@@ -458,7 +464,6 @@ func (rc *RedisCompare) Single2Single() error {
 	//生成报告
 	if rc.Report {
 		GenReport([]string{compare.ResultFile}, compares)
-
 	}
 	return nil
 }
@@ -529,6 +534,7 @@ func (rc *RedisCompare) Single2Cluster() error {
 	compare.CompareDB()
 
 	for i := 0; i < rc.CompareTimes-1; i++ {
+		time.Sleep(time.Duration(rc.CompareInterval) * time.Second)
 		compare.CompareKeysFromResultFile([]string{compare.ResultFile})
 	}
 	comparemap, _ := commons.Struct2Map(compare)
@@ -622,6 +628,7 @@ func (rc *RedisCompare) MultiSingle2Single() error {
 		compare.CompareDB()
 
 		for i := 0; i < rc.CompareTimes-1; i++ {
+			time.Sleep(time.Duration(rc.CompareInterval) * time.Second)
 			compare.CompareKeysFromResultFile([]string{compare.ResultFile})
 		}
 		resultfiles = append(resultfiles, compare.ResultFile)
@@ -719,6 +726,7 @@ func (rc *RedisCompare) MultiSingle2Cluster() error {
 		compare.CompareDB()
 
 		for i := 0; i < rc.CompareTimes-1; i++ {
+			time.Sleep(time.Duration(rc.CompareInterval) * time.Second)
 			compare.CompareKeysFromResultFile([]string{compare.ResultFile})
 		}
 		resultfiles = append(resultfiles, compare.ResultFile)
@@ -810,6 +818,7 @@ func (rc *RedisCompare) Cluster2Cluster() error {
 		}
 		compare.CompareDB()
 		for i := 0; i < rc.CompareTimes-1; i++ {
+			time.Sleep(time.Duration(rc.CompareInterval) * time.Second)
 			compare.CompareKeysFromResultFile([]string{compare.ResultFile})
 		}
 		resultfiles = append(resultfiles, compare.ResultFile)

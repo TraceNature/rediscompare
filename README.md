@@ -6,7 +6,7 @@ rediscompare 是用来对比redis 数据库数据一致性的命令行工具
 
 ## 校验机制
 
-rediscompare 通过scan 命令扫描源库中的左右数据依次与目标数据库进行比较，从value长度、value值、ttl等维度进行核对。最后生成result文件，文件中包含数据不一致的key已经原因。
+rediscompare 通过scan 命令扫描源库中的左右数据依次与目标数据库进行比较，从value长度、value值、ttl等维度进行核对。最后生成result文件，文件中包含数据不一致的key以及不一致原因。
 在实际场景中，某些key可能在首次比较中由于传输延迟问题不一致，rediscompare 支持循环多次对比，既根据上次对比中不一致的key重新对比并生成result文件，循环次数可以通过"--comparetimes" 参数指定
 
 ## 场景
