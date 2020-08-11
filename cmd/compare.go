@@ -342,7 +342,6 @@ func cluster2clusterCommandFunc(cmd *cobra.Command, args []string) {
 		saddr := SAddr{
 			Addr:     v,
 			Password: spassword,
-			//Dbs:      []int{sdb},
 		}
 		saddrstructs = append(saddrstructs, saddr)
 	}
@@ -424,12 +423,12 @@ func (rc *RedisCompare) Single2Single() error {
 	//check redis 连通性
 	sconnerr := commons.CheckRedisClientConnect(sclient)
 	if sconnerr != nil {
-		return sconnerr
+		return errors.New(sclient.Options().Addr + " " + sconnerr.Error())
 	}
 
 	tconnerr := commons.CheckRedisClientConnect(tclient)
 	if tconnerr != nil {
-		return tconnerr
+		return errors.New(tclient.Options().Addr + " " + tconnerr.Error())
 	}
 
 	//删除目录下上次运行时临时产生的result文件
@@ -505,11 +504,20 @@ func (rc *RedisCompare) Single2Cluster() error {
 	//check redis 连通性
 	sconnerr := commons.CheckRedisClientConnect(sclient)
 	if sconnerr != nil {
-		return sconnerr
+		return errors.New(sclient.Options().Addr + " " + sconnerr.Error())
 	}
 	tconnerr := commons.CheckRedisClusterClientConnect(tclient)
 	if tconnerr != nil {
-		return tconnerr
+		addrs := ""
+		for k, v := range tclient.Options().Addrs {
+			if k == len(tclient.Options().Addrs)-1 {
+				addrs = addrs + v
+			} else {
+				addrs = addrs + v + ";"
+			}
+
+		}
+		return errors.New(addrs + " " + sconnerr.Error())
 	}
 
 	//删除目录下上次运行时临时产生的result文件
@@ -563,6 +571,7 @@ func (rc *RedisCompare) MultiSingle2Single() error {
 	}
 
 	for _, v := range rc.Saddr {
+
 		if len(v.Dbs) == 0 {
 			continue
 		}
@@ -597,12 +606,12 @@ func (rc *RedisCompare) MultiSingle2Single() error {
 	for _, v := range sclients {
 		sconnerr := commons.CheckRedisClientConnect(v)
 		if sconnerr != nil {
-			return sconnerr
+			return errors.New(v.Options().Addr + " " + sconnerr.Error())
 		}
 	}
 	tconnerr := commons.CheckRedisClientConnect(tclient)
 	if tconnerr != nil {
-		return tconnerr
+		return errors.New(tclient.Options().Addr + " " + tconnerr.Error())
 	}
 
 	//删除目录下上次运行时临时产生的result文件
@@ -629,7 +638,8 @@ func (rc *RedisCompare) MultiSingle2Single() error {
 
 		for i := 0; i < rc.CompareTimes-1; i++ {
 			time.Sleep(time.Duration(rc.CompareInterval) * time.Second)
-			compare.CompareKeysFromResultFile([]string{compare.ResultFile})
+			rfile := compare.ResultFile
+			compare.CompareKeysFromResultFile([]string{rfile})
 		}
 		resultfiles = append(resultfiles, compare.ResultFile)
 		comparemap, _ := commons.Struct2Map(compare)
@@ -694,12 +704,21 @@ func (rc *RedisCompare) MultiSingle2Cluster() error {
 	for _, v := range sclients {
 		sconnerr := commons.CheckRedisClientConnect(v)
 		if sconnerr != nil {
-			return sconnerr
+			return errors.New(v.Options().Addr + " " + sconnerr.Error())
 		}
 	}
 	tconnerr := commons.CheckRedisClusterClientConnect(tclient)
 	if tconnerr != nil {
-		return tconnerr
+		addrs := ""
+		for k, v := range tclient.Options().Addrs {
+			if k == len(tclient.Options().Addrs)-1 {
+				addrs = addrs + v
+			} else {
+				addrs = addrs + v + ";"
+			}
+
+		}
+		return errors.New(addrs + " " + tconnerr.Error())
 	}
 
 	//删除目录下上次运行时临时产生的result文件
@@ -727,7 +746,8 @@ func (rc *RedisCompare) MultiSingle2Cluster() error {
 
 		for i := 0; i < rc.CompareTimes-1; i++ {
 			time.Sleep(time.Duration(rc.CompareInterval) * time.Second)
-			compare.CompareKeysFromResultFile([]string{compare.ResultFile})
+			rfile := compare.ResultFile
+			compare.CompareKeysFromResultFile([]string{rfile})
 		}
 		resultfiles = append(resultfiles, compare.ResultFile)
 		comparemap, _ := commons.Struct2Map(compare)
@@ -766,8 +786,8 @@ func (rc *RedisCompare) Cluster2Cluster() error {
 			Addr: v.Addr,
 			DB:   0,
 		}
-		if rc.Spassword != "" {
-			sopt.Password = rc.Spassword
+		if v.Password != "" {
+			sopt.Password = v.Password
 		}
 		sclient := commons.GetGoRedisClient(sopt)
 		sclients = append(sclients, sclient)
@@ -788,12 +808,23 @@ func (rc *RedisCompare) Cluster2Cluster() error {
 	for _, v := range sclients {
 		sconnerr := commons.CheckRedisClientConnect(v)
 		if sconnerr != nil {
-			return sconnerr
+			if sconnerr != nil {
+				return errors.New(v.Options().Addr + " " + sconnerr.Error())
+			}
 		}
 	}
 	tconnerr := commons.CheckRedisClusterClientConnect(tclient)
 	if tconnerr != nil {
-		return tconnerr
+		addrs := ""
+		for k, v := range tclient.Options().Addrs {
+			if k == len(tclient.Options().Addrs)-1 {
+				addrs = addrs + v
+			} else {
+				addrs = addrs + v + ";"
+			}
+
+		}
+		return errors.New(addrs + " " + tconnerr.Error())
 	}
 
 	//删除目录下上次运行时临时产生的result文件
@@ -805,7 +836,6 @@ func (rc *RedisCompare) Cluster2Cluster() error {
 	}
 
 	resultfiles := []string{}
-	//compares := []*compare.CompareSingle2Cluster{}
 	var compares []interface{}
 	for _, v := range sclients {
 		compare := &compare.CompareSingle2Cluster{
@@ -819,7 +849,9 @@ func (rc *RedisCompare) Cluster2Cluster() error {
 		compare.CompareDB()
 		for i := 0; i < rc.CompareTimes-1; i++ {
 			time.Sleep(time.Duration(rc.CompareInterval) * time.Second)
-			compare.CompareKeysFromResultFile([]string{compare.ResultFile})
+			rfile := compare.ResultFile
+			compare.CompareKeysFromResultFile([]string{rfile})
+			zaplogger.Sugar().Info(rfile + "|" + compare.ResultFile)
 		}
 		resultfiles = append(resultfiles, compare.ResultFile)
 
