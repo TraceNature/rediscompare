@@ -1,0 +1,17 @@
+# Scenario  single instance to single instance example
+saddr:
+  - addr: "10.0.0.1:6379"
+    password: "xxxxxx"
+    dbs:
+      - 0
+      - 2
+      - 3
+taddr: "192.168.1.2:6379"
+tpassword: "xxxxxx"
+batchsize: 30
+threads: 2
+ttldiff: 10000
+comparetimes: 3
+compareinterval: 5
+report:  true
+scenario: "single2single"

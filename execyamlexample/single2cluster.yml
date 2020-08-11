@@ -1,0 +1,17 @@
+# Scenario single instance to origin cluster example
+saddr:
+  - addr: "10.0.0.1:6379"
+    password: "xxxx"
+    dbs:
+      - 0
+      - 2
+      - 3
+taddr: "192.168.1.1:16379,192.168.1.1:16380,192.168.1.2:16379,192.168.1.2:16380,192.168.1.3:16379,192.168.1.3:16380"
+tpassword: "xxxx"
+batchsize: 30
+threads: 2
+ttldiff: 10000
+comparetimes: 3
+compareinterval: 2
+report:  true
+scenario: "single2cluster"
