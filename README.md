@@ -47,7 +47,6 @@ go build -o rediscompare
 
 rediscompare supports command line mode and interactive mode, interactive mode supports command prompt. The comparison command supports direct command input and yaml customization. Let's introduce the basic usage of each scene according to the scene.
 
-使用 -i 参数进入交互模式 "rediscompare -i"
 Use the -i parameter to enter the interactive mode "rediscompare -i"
 
 #### compare subcommand
