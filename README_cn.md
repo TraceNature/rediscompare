@@ -136,7 +136,7 @@ rediscompare 支持命令行模式和交互模式，交互模式支持命令提�
 
 multisingle2single、multisingle2cluster两个场景由于原库映射关系比较复杂命令行不易表示顾目前只支持yaml文件执行；single2single、 single2cluster、cluster2cluster支持命令行和yaml文件模式。
 
-##### yaml 文件示例
+#### yaml 文件示例
 
 yaml示例文件请参考  execyamlexample 目录中的 .yml文件
 

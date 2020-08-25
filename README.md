@@ -12,7 +12,7 @@ rediscompare scans the data in the source database and compares it with the targ
 
 In actual scenarios, some keys may be inconsistent in the first comparison due to transmission delay issues. Rediscompare supports multiple comparisons in a cycle, which is based on the inconsistent keys in the last comparison and generates a result file. The number of cycles can be passed "--comparetimes" "Parameter specification
 
-## 场景 Scenario
+## Scenario
 
 rediscompare provides a comparison plan for the following scenarios according to the different types of targets and sources
 
@@ -139,7 +139,7 @@ Use the -i parameter to enter the interactive mode "rediscompare -i"
 
 The two scenarios of multisingle2single and multisingle2cluster are difficult to express due to the complex mapping relationship of the databases. Currently, only yaml file execution is supported; single2single, single2cluster, cluster2cluster support command line and yaml file mode.
 
-##### yaml example
+#### yaml example
 
 For yaml example files, please refer to the .yml file in the execyamlexample directory
 
