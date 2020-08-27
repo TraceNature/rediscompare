@@ -70,7 +70,7 @@ func init() {
 }
 
 func cliRun(cmd *cobra.Command, args []string) {
-	//viper.Set("syncserver", syncserver)
+	banner := "\n ___               _           ___                                               \n|  _`\\            ( ) _       (  _`\\                                             \n| (_) )   __     _| |(_)  ___ | ( (_)   _     ___ ___   _ _      _ _  _ __   __  \n| ,  /  /'__`\\ /'_` || |/',__)| |  _  /'_`\\ /' _ ` _ `\\( '_`\\  /'_` )( '__)/'__`\\\n| |\\ \\ (  ___/( (_| || |\\__, \\| (_( )( (_) )| ( ) ( ) || (_) )( (_| || |  (  ___/\n(_) (_)`\\____)`\\__,_)(_)(____/(____/'`\\___/'(_) (_) (_)| ,__/'`\\__,_)(_)  `\\____)\n                                                       | |                       \n                                                       (_)                       \n"
 
 	if interact {
 		err := check.CheckEnv()
@@ -78,6 +78,7 @@ func cliRun(cmd *cobra.Command, args []string) {
 			fmt.Println(err)
 			os.Exit(1)
 		}
+		cmd.Println(banner)
 		cmd.Println("Input 'help;' for usage. \nCommand must end with ';'. \n'tab' for command complete.\n^C or exit to quit.")
 		loop()
 		return
@@ -218,7 +219,7 @@ func initConfig() {
 func loop() {
 	rl, err := readline.NewEx(&readline.Config{
 		//Prompt:            "\033[31m»\033[0m ",
-		Prompt:                 "rediscompare-cli> ",
+		Prompt:                 "RedisCompare> ",
 		HistoryFile:            "/tmp/readline.tmp",
 		AutoComplete:           readlinecompleter,
 		DisableAutoSaveHistory: true,
@@ -259,7 +260,7 @@ func loop() {
 		}
 		cmd := strings.Join(cmds, " ")
 		cmds = cmds[:0]
-		rl.SetPrompt("rediscompare-cli> ")
+		rl.SetPrompt("RedisCompare> ")
 		rl.SaveHistory(cmd)
 
 		args, err := shellwords.Parse(cmd)
@@ -267,48 +268,7 @@ func loop() {
 			fmt.Printf("parse command err: %v\n", err)
 			continue
 		}
-
-		//args = append(args, "-u", commandFlags.URL)
-		//if commandFlags.CAPath != "" && commandFlags.CertPath != "" && commandFlags.KeyPath != "" {
-		//	args = append(args, "--cacert", commandFlags.CAPath, "--cert", commandFlags.CertPath, "--key", commandFlags.KeyPath)
-		//}
 		Start(args)
-	}
-}
-
-func completer(in prompt.Document) []prompt.Suggest {
-	w := in.GetWordBeforeCursor()
-
-	if w == "" {
-		return []prompt.Suggest{}
-	}
-
-	return prompt.FilterHasPrefix(suggest, w, true)
-}
-
-func executor(in string) {
-	//fmt.Println(in)
-	if strings.ToLower(in) == "exit" {
-		os.Exit(0)
-	}
-
-	args, err := shellwords.Parse(in)
-	if err != nil {
-		fmt.Printf("parse command err: %v\n", err)
-		return
-	}
-	Start(args)
-}
-
-func ListCommandTree(cmd *cobra.Command, level int) {
-	if len(cmd.Commands()) != 0 {
-		for _, v := range cmd.Commands() {
-			for i := 0; i < level; i++ {
-				fmt.Print("    ")
-			}
-			fmt.Println(strings.Split(v.Use, " ")[0])
-			ListCommandTree(v, level+1)
-		}
 	}
 }
 
@@ -316,17 +276,14 @@ func GenCompleter(cmd *cobra.Command) []readline.PrefixCompleterInterface {
 	pc := []readline.PrefixCompleterInterface{}
 	if len(cmd.Commands()) != 0 {
 		for _, v := range cmd.Commands() {
-			//fmt.Println(strings.Split(v.Use, " ")[0]
 			if v.HasFlags() {
-				flagspc := []readline.PrefixCompleterInterface{}
-
-				flaguseages := strings.Split(strings.Trim(v.Flags().FlagUsages(), " "), "\n")
-
-				for i := 0; i < len(flaguseages)-1; i++ {
-					flagspc = append(flagspc, readline.PcItem(strings.Split(strings.Trim(flaguseages[i], " "), " ")[0]))
+				flagsPc := []readline.PrefixCompleterInterface{}
+				flagUsages := strings.Split(strings.Trim(v.Flags().FlagUsages(), " "), "\n")
+				for i := 0; i < len(flagUsages)-1; i++ {
+					flagsPc = append(flagsPc, readline.PcItem(strings.Split(strings.Trim(flagUsages[i], " "), " ")[0]))
 				}
-				flagspc = append(flagspc, GenCompleter(v)...)
-				pc = append(pc, readline.PcItem(strings.Split(v.Use, " ")[0], flagspc...))
+				flagsPc = append(flagsPc, GenCompleter(v)...)
+				pc = append(pc, readline.PcItem(strings.Split(v.Use, " ")[0], flagsPc...))
 
 			} else {
 				pc = append(pc, readline.PcItem(strings.Split(v.Use, " ")[0], GenCompleter(v)...))
