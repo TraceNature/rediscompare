@@ -140,17 +140,7 @@ func getMainCmd(args []string) *cobra.Command {
 	rootCmd.ParseFlags(args)
 	rootCmd.SetOut(os.Stdout)
 
-	//for _, v := range rootCmd.Commands() {
-	//	fmt.Println(v.Use)
-	//}
 	readlinecompleter = readline.NewPrefixCompleter(GenCompleter(rootCmd)...)
-
-	//readlinecompleter = readline.NewPrefixCompleter(readline.PcItem("start", readline.PcItem("--abc")))
-	//rc := readline.NewPrefixCompleter(GenCompleter(rootCmd)...)
-	//for _, v := range rc.Children {
-	//	fmt.Println(v.GetName())
-	//}
-
 	return rootCmd
 }
 
@@ -174,12 +164,6 @@ func Start(args []string) {
 
 func startCmd(getCmd func([]string) *cobra.Command, args []string) {
 	rootCmd := getCmd(args)
-	//if len(commandFlags.CAPath) != 0 {
-	//	if err := command.InitHTTPSClient(commandFlags.CAPath, commandFlags.CertPath, commandFlags.KeyPath); err != nil {
-	//		rootCmd.Println(err)
-	//		return
-	//	}
-	//}
 
 	if err := rootCmd.Execute(); err != nil {
 		rootCmd.Println(err)
@@ -202,10 +186,6 @@ func initConfig() {
 		viper.SetConfigName(".config")
 	}
 
-	// If a config file is found, read it in.
-	//if err := viper.ReadInConfig(); err != nil {
-	//	Confignotseterr = err
-	//}
 	viper.ReadInConfig()
 
 	viper.AutomaticEnv() // read in environment variables that match
