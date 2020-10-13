@@ -4,16 +4,18 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"github.com/ghodss/yaml"
 	"github.com/go-redis/redis/v7"
+	"github.com/olekukonko/tablewriter"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"github.com/ghodss/yaml"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"rediscompare/commons"
 	"rediscompare/compare"
 	"rediscompare/globalzap"
+	"sort"
 	"strings"
 	"time"
 )
@@ -55,6 +57,7 @@ func NewCompareCommand() *cobra.Command {
 		Short: "compare redis db",
 	}
 
+	compare.AddCommand(NewParametersCommand())
 	compare.AddCommand(NewExecuteCommand())
 	compare.AddCommand(NewSingle2SingleCommand())
 	compare.AddCommand(NewSingle2ClusterCommand())
@@ -72,6 +75,24 @@ func NewExecuteCommand() *cobra.Command {
 	}
 	return sc
 }
+
+func NewParametersCommand() *cobra.Command {
+	sc := &cobra.Command{
+		Use:   "parameters ",
+		Short: "compare single instance redis instance parameters",
+		Run:   parametersCommandFunc,
+	}
+	//sc.AddCommand(NewTaskCreateSourceCommand())
+	//sc.Flags().Bool("afresh", false, "afresh task from begin")
+	sc.Flags().String("saddr", "127.0.0.1:6379", "Source redis address default is 127.0.0.1:6379")
+	sc.Flags().String("taddr", "127.0.0.1:6379", "Target redis address default is 127.0.0.1:6379")
+	sc.Flags().String("spassword", "", "Source redis password")
+	sc.Flags().String("tpassword", "", "Target redis password")
+	sc.Flags().Bool("report", false, "whether generate report default is false")
+	return sc
+
+}
+
 func NewSingle2SingleCommand() *cobra.Command {
 	sc := &cobra.Command{
 		Use:   "single2single ",
@@ -189,6 +210,74 @@ func executeCommandFunc(cmd *cobra.Command, args []string) {
 	if execerr != nil {
 		cmd.PrintErrln(execerr)
 	}
+
+}
+
+func parametersCommandFunc(cmd *cobra.Command, args []string) {
+	saddr, _ := cmd.Flags().GetString("saddr")
+	taddr, _ := cmd.Flags().GetString("taddr")
+	spassword, _ := cmd.Flags().GetString("spassword")
+	tpassword, _ := cmd.Flags().GetString("tpassword")
+	//report, _ := cmd.Flags().GetBool("report")
+
+	sopt := &redis.Options{
+		Addr: saddr,
+		DB:   0, // use default DB
+	}
+	sopt.Password = spassword
+	sclient := commons.GetGoRedisClient(sopt)
+
+	topt := &redis.Options{
+		Addr: taddr,
+		DB:   0, // use default DB
+	}
+	topt.Password = tpassword
+	tclient := commons.GetGoRedisClient(topt)
+
+	defer sclient.Close()
+	defer tclient.Close()
+
+	serr := commons.CheckRedisClientConnect(sclient)
+	terr := commons.CheckRedisClientConnect(tclient)
+	if serr != nil {
+		cmd.PrintErr(serr)
+		return
+	}
+
+	if terr != nil {
+		cmd.PrintErr(terr)
+		return
+	}
+
+	ce := &compare.CompoareEnvironment{
+		Sclinet: sclient,
+		Tclient: tclient,
+	}
+
+	m := ce.DiffParameters()
+
+	//排序
+	var keys []string
+	for k, _ := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	data := [][]string{}
+	for _, k := range keys {
+		line := []string{
+			k, m[k][0], m[k][1],
+		}
+		data = append(data, line)
+	}
+
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
+	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	table.SetColWidth(12)
+	table.SetHeader([]string{"Parameters", sclient.Options().Addr, tclient.Options().Addr})
+	//table.SetBorder(false)
+	table.AppendBulk(data)
+	table.Render()
 
 }
 

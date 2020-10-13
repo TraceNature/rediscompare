@@ -11,8 +11,9 @@ func TestCompare_CompareDB(t *testing.T) {
 		Addr: "114.67.67.7:6379",
 		DB:   0,
 	}
-	
+
 	sclient := commons.GetGoRedisClient(sopt)
+	defer sclient.Close()
 
 }
 
@@ -43,7 +44,7 @@ func TestCompareSingle2Single_CompareKeysFromResultFile(t *testing.T) {
 	//	cmd.PrintErrln(errors.New("Cannot connect source redis"))
 	//	return
 	//}
-	//if !commons.CheckRedisClientConnect(tclient) {
+	//if !commons.CheckRedisClientConnect(Tclient) {
 	//	cmd.PrintErrln(errors.New("Cannot connect target redis"))
 	//	return
 	//}

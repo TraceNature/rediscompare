@@ -1,0 +1,67 @@
+daemonize no
+pidfile /var/run/redis.pid
+port 6379
+tcp-backlog 511
+bind 127.0.0.1
+unixsocket /tmp/redis.sock
+unixsocketperm 700
+timeout 0
+tcp-keepalive 0
+loglevel notice
+logfile ""
+syslog-enabled no
+syslog-ident redis
+syslog-facility local0
+databases 16
+save 900 1
+save 300 10
+save 60 10000
+stop-writes-on-bgsave-error yes
+rdbcompression yes
+rdbchecksum yes
+dbfilename dump.rdb
+dir ./
+slaveof <masterip> <masterport>
+masterauth <master-password>
+slave-serve-stale-data yes
+slave-read-only yes
+repl-diskless-sync no
+repl-diskless-sync-delay 5
+repl-ping-slave-period 10
+repl-timeout 60
+repl-disable-tcp-nodelay no
+repl-backlog-size 1mb
+repl-backlog-ttl 3600
+slave-priority 100
+min-slaves-to-write 3
+min-slaves-max-lag 10
+maxclients 10000
+maxmemory <bytes>
+maxmemory-policy volatile-lru
+maxmemory-samples 3
+appendonly no
+appendfilename "appendonly.aof"
+appendfsync everysec
+appendfsync no
+no-appendfsync-on-rewrite no
+auto-aof-rewrite-percentage 100
+auto-aof-rewrite-min-size 64mb
+aof-load-truncated yes
+lua-time-limit 5000
+slowlog-max-len 128
+latency-monitor-threshold 0
+otify-keyspace-events ""
+hash-max-ziplist-entries 512
+hash-max-ziplist-value 64
+list-max-ziplist-entries 512
+list-max-ziplist-value 64
+set-max-intset-entries 512
+zset-max-ziplist-entries 128
+zset-max-ziplist-value 64
+hll-sparse-max-bytes 3000
+activerehashing yes
+client-output-buffer-limit normal 0 0 0
+client-output-buffer-limit slave 256mb 64mb 60
+client-output-buffer-limit pubsub 32mb 8mb 60
+hz 10
+aof-rewrite-incremental-fsync yes
