@@ -15,6 +15,9 @@ rediscompare 通过scan 命令扫描源库中的左右数据依次与目标数�
 
 rediscompare 根据目标以及源的不同类型提供一下场景的对比方案
 
+* compare parameters
+    用于对比redis实例的参数差异
+
 * single2single
     redis单实例到单实例的比较。用于比较单实例单库的数据一致性
 
@@ -48,6 +51,11 @@ rediscompare 支持命令行模式和交互模式，交互模式支持命令提�
 使用 -i 参数进入交互模式 "rediscompare -i"
 
 #### compare 子命令
+
+* parameters
+  ···shell
+    rediscompare compare parameters --saddr 10.0.0.1:6379 --spassword "redistest0102" --taddr 10.0.0.2:6379 --tpassword "testredis0102"
+  ···
 
 * single2single
   * 命令模式

@@ -16,6 +16,9 @@ In actual scenarios, some keys may be inconsistent in the first comparison due t
 
 rediscompare provides a comparison plan for the following scenarios according to the different types of targets and sources
 
+* compare parameters
+    To compare diff of parameters between two redis insance
+
 * single2single
     Comparison of redis single instance to single instance. Used to compare the data consistency of a single instance single database
 
@@ -51,12 +54,17 @@ Use the -i parameter to enter the interactive mode "rediscompare -i"
 
 #### compare subcommand
 
+* parameters
+  ···shell
+    rediscompare compare parameters --saddr 10.0.0.1:6379 --spassword "redistest0102" --taddr 10.0.0.2:6379 --tpassword "testredis0102"
+  ···
+
 * single2single  
   * 命令模式   Command mode
 
     ``` shell
      rediscompare compare single2single  --saddr "10.0.0.1:6379"    --spassword  "redistest0102"  --taddr "10.0.0.2:6379"   --tpassword  "redistest0102" --comparetimes 3
-    ``` 
+    ```
 
 * single2cluster
   * Command mode
@@ -70,7 +78,7 @@ Use the -i parameter to enter the interactive mode "rediscompare -i"
 
      ```shell
      rediscompare  compare cluster2cluster  --saddr  "10.0.0.1:36379,10.0.0.2:36379,10.0.0.3:36379"    --spassword  "testredis0102"  --taddr "10.0.1.1:16379,10.0.1.1:16380,10.0.1.2:16379,10.0.1.2:16380,10.0.1.3:16379,10.0.1.3:16380"   --tpassword  "testredis0102" --comparetimes 3
-     ``` 
+     ```
 
 * multisingle2single
   * Execute yaml file
@@ -106,7 +114,7 @@ Use the -i parameter to enter the interactive mode "rediscompare -i"
 
 * multisingle2cluster  
   * Execute yaml file
-       
+
      ```yaml
      # multisingle2cluster yaml file
      saddr:
