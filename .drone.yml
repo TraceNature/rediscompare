@@ -22,8 +22,8 @@ workspace:
   base: /go
   path: src/rediscompare
 
-pipline:
-  build:
+steps:
+  - name: build
     image: golang
     commands:
       - go mod tidy
