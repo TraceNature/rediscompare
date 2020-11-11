@@ -53,9 +53,10 @@ rediscompare 支持命令行模式和交互模式，交互模式支持命令提�
 #### compare 子命令
 
 * parameters
-  ···shell
+  
+  ```shell
     rediscompare compare parameters --saddr 10.0.0.1:6379 --spassword "redistest0102" --taddr 10.0.0.2:6379 --tpassword "testredis0102"
-  ···
+  ```
 
 * single2single
   * 命令模式

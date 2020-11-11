@@ -2,16 +2,15 @@ package interact
 
 import (
 	"fmt"
-	"github.com/c-bata/go-prompt"
 	"github.com/chzyer/readline"
 	"github.com/mattn/go-shellwords"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"io"
+	"os"
 	"rediscompare/check"
 	"rediscompare/cmd"
 	"rediscompare/commons"
-	"io"
-	"os"
 	"strings"
 )
 
@@ -39,27 +38,28 @@ var LivePrefixState struct {
 }
 
 var query = ""
-var suggest = []prompt.Suggest{
-	//config
-	{Text: "config", Description: "config env"},
-	{Text: "show ", Description: "show config"},
-	{Text: "set ", Description: "set config"},
-	{Text: "delete ", Description: "delete"},
 
-
-	//task
-	{Text: "task", Description: "about task"},
-	{Text: "create ", Description: "create task"},
-	{Text: "start ", Description: "start task"},
-	{Text: "--afresh", Description: "start task afresh"},
-	{Text: "remove ", Description: "remove task"},
-	{Text: "stop ", Description: "stop task"},
-	{Text: "status ", Description: "query task status"},
-	{Text: "byname ", Description: "query task status by task name"},
-	{Text: "bytaskid ", Description: "query task status by task id"},
-	{Text: "bygroupid ", Description: "query task status by task group id"},
-	{Text: "all ", Description: "query all tasks status "},
-}
+//var suggest = []prompt.Suggest{
+//	//config
+//	{Text: "config", Description: "config env"},
+//	{Text: "show ", Description: "show config"},
+//	{Text: "set ", Description: "set config"},
+//	{Text: "delete ", Description: "delete"},
+//
+//
+//	//task
+//	{Text: "task", Description: "about task"},
+//	{Text: "create ", Description: "create task"},
+//	{Text: "start ", Description: "start task"},
+//	{Text: "--afresh", Description: "start task afresh"},
+//	{Text: "remove ", Description: "remove task"},
+//	{Text: "stop ", Description: "stop task"},
+//	{Text: "status ", Description: "query task status"},
+//	{Text: "byname ", Description: "query task status by task name"},
+//	{Text: "bytaskid ", Description: "query task status by task id"},
+//	{Text: "bygroupid ", Description: "query task status by task group id"},
+//	{Text: "all ", Description: "query all tasks status "},
+//}
 
 var readlinecompleter *readline.PrefixCompleter
 
@@ -128,9 +128,9 @@ func getInteractCmd(args []string) *cobra.Command {
 func getMainCmd(args []string) *cobra.Command {
 	rootCmd := getBasicCmd()
 
-	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default is $HOME/.config.yaml)")
-	rootCmd.PersistentFlags().StringVarP(&syncserver, "syncserver", "s", "", "sync server address")
-	rootCmd.Flags().BoolVarP(&detach, "detach", "d", true, "Run pdctl without readline.")
+	//rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default is $HOME/.config.yaml)")
+	//rootCmd.PersistentFlags().StringVarP(&syncserver, "syncserver", "s", "", "sync server address")
+	//rootCmd.Flags().BoolVarP(&detach, "detach", "d", true, "Run pdctl without readline.")
 	rootCmd.Flags().BoolVarP(&interact, "interact", "i", false, "Run pdctl with readline.")
 	rootCmd.Flags().BoolVarP(&version, "version", "V", false, "Print version information and exit.")
 

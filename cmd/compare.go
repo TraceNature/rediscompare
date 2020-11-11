@@ -240,12 +240,12 @@ func parametersCommandFunc(cmd *cobra.Command, args []string) {
 	serr := commons.CheckRedisClientConnect(sclient)
 	terr := commons.CheckRedisClientConnect(tclient)
 	if serr != nil {
-		cmd.PrintErr(serr)
+		cmd.PrintErrln(serr)
 		return
 	}
 
 	if terr != nil {
-		cmd.PrintErr(terr)
+		cmd.PrintErrln(terr)
 		return
 	}
 

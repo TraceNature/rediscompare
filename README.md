@@ -55,9 +55,10 @@ Use the -i parameter to enter the interactive mode "rediscompare -i"
 #### compare subcommand
 
 * parameters
-  ···shell
+  
+  ```shell
     rediscompare compare parameters --saddr 10.0.0.1:6379 --spassword "redistest0102" --taddr 10.0.0.2:6379 --tpassword "testredis0102"
-  ···
+  ```
 
 * single2single  
   * 命令模式   Command mode
