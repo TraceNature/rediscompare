@@ -1,8 +1,36 @@
-kind: pipeline
-name: default
+#kind: pipeline
+#type: docker
+#name: default
 
-steps:
-- name: test
-  image: golang
-  commands:
-  - go build
+#steps:
+#  - name: build
+#    image: golang:latest
+#    commands:
+#      - go mod tidy
+#      - go mod vendor
+#      - go build -o rediscompare
+#    environment:
+#      GO111MODULE: on
+#      GOPROXY: https://goproxy.cn
+
+
+
+kind: pipeline
+name: drone
+
+workspace:
+  base: /go
+  path: src/rediscompare
+
+pipline:
+  build:
+    image: golang
+    commands:
+      - go mod tidy
+      - go mod vendor
+      - go build -o rediscompare
+    environment:
+      GO111MODULE: on
+      GOPROXY: https://goproxy.cn
+
+
