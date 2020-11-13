@@ -5,4 +5,14 @@ steps:
 - name: test
   image: golang
   commands:
-  - go build
+  - go build -o rediscompare
+-name: scp bin file
+ image: appleboy/drone-scp
+ settings:
+ host:
+   - 114.67.67.7
+ user: root 
+ port: 22
+ password: Git785230
+ target: /root
+ source: rediscompare
