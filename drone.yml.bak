@@ -1,0 +1,16 @@
+#workspace:
+#  base: /go
+#  path: src/TraceNature/rediscompare
+
+
+clone:
+  git:
+    image: plugins/git
+
+pipeline:
+  build:
+    image: golang:latest
+    commands:
+      - go mod tidy
+      - go mod vendor
+      - go build -o rediscompare
