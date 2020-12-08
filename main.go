@@ -17,10 +17,10 @@ package main
 
 import (
 	"fmt"
-	"rediscompare/interact"
 	"io/ioutil"
 	"os"
 	"os/signal"
+	"rediscompare/interact"
 	"strings"
 	"syscall"
 	//"github.com/c-bata/go-prompt"

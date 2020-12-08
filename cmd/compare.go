@@ -258,7 +258,7 @@ func parametersCommandFunc(cmd *cobra.Command, args []string) {
 
 	//排序
 	var keys []string
-	for k, _ := range m {
+	for k := range m {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
@@ -471,7 +471,6 @@ func (rc *RedisCompare) Execute() error {
 	default:
 		return errors.New("Scenario not exists")
 	}
-	return nil
 }
 
 func (rc *RedisCompare) Single2Single() error {

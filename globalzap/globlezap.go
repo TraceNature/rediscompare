@@ -1,12 +1,12 @@
 package globalzap
 
 import (
-	"rediscompare/commons"
 	"fmt"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
 	"os"
+	"rediscompare/commons"
 	"sync"
 )
 
@@ -110,7 +110,7 @@ func (d *LoggerDefine) InitLogger() {
 
 		encoder,
 		zapcore.NewMultiWriteSyncer(zapcore.AddSync(os.Stdout), zapcore.AddSync(&(d.Hook))), // 打印到控制台和文件
-		atomicLevel,                                                                         // 日志级别
+		atomicLevel, // 日志级别
 	)
 
 	options := []zap.Option{}
