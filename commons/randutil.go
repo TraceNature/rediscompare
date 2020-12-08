@@ -1,9 +1,9 @@
 package commons
 
 import (
+	"github.com/satori/go.uuid"
 	"math/rand"
 	"time"
-	"github.com/satori/go.uuid"
 )
 
 const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"

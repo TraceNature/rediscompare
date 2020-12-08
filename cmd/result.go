@@ -6,9 +6,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
 
+	"github.com/olekukonko/tablewriter"
 	"os"
 	"strings"
-	"github.com/olekukonko/tablewriter"
 )
 
 // NewResultCommand return a config subcommand of rootCmd

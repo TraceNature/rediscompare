@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-redis/redis/v7"
 	"github.com/panjf2000/ants/v2"
+	"github.com/tidwall/gjson"
 	"go.uber.org/zap"
 	"math"
 	"os"
@@ -15,7 +16,6 @@ import (
 	"strconv"
 	"sync"
 	"time"
-	"github.com/tidwall/gjson"
 )
 
 type CompareSingle2Single struct {
