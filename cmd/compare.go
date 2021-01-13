@@ -23,11 +23,11 @@ import (
 var zaplogger = globalzap.GetLogger()
 
 const (
-	Scenario_single2single       = "single2single"
-	Scenario_single2cluster      = "single2cluster"
-	Scenario_multisingle2single  = "multisingle2single"
-	Scenario_multisingle2cluster = "multisingle2cluster"
-	Scenario_cluster2cluster     = "cluster2cluster"
+	ScenarioSingle2single       = "single2single"
+	ScenarioSingle2cluster      = "single2cluster"
+	ScenarioMultiSingle2single  = "multisingle2single"
+	ScenarioMultiSingle2cluster = "multisingle2cluster"
+	ScenarioCluster2cluster     = "cluster2cluster"
 )
 
 type SAddr struct {
@@ -44,7 +44,7 @@ type RedisCompare struct {
 	Tdb             int     `json:"tdb"`
 	BatchSize       int     `json:"batchsize"`
 	Threads         int     `json:"threads"`
-	TTLdiff         int     `json:"ttldiff"`
+	TTLDiff         int     `json:"ttldiff"`
 	CompareTimes    int     `json:"comparetimes"`
 	CompareInterval int     `json:"compareinterval"`
 	Report          bool    `json:"report"`
@@ -220,12 +220,12 @@ func parametersCommandFunc(cmd *cobra.Command, args []string) {
 	tpassword, _ := cmd.Flags().GetString("tpassword")
 	//report, _ := cmd.Flags().GetBool("report")
 
-	sopt := &redis.Options{
+	sOpt := &redis.Options{
 		Addr: saddr,
 		DB:   0, // use default DB
 	}
-	sopt.Password = spassword
-	sclient := commons.GetGoRedisClient(sopt)
+	sOpt.Password = spassword
+	sClient := commons.GetGoRedisClient(sOpt)
 
 	topt := &redis.Options{
 		Addr: taddr,
@@ -234,10 +234,10 @@ func parametersCommandFunc(cmd *cobra.Command, args []string) {
 	topt.Password = tpassword
 	tclient := commons.GetGoRedisClient(topt)
 
-	defer sclient.Close()
+	defer sClient.Close()
 	defer tclient.Close()
 
-	serr := commons.CheckRedisClientConnect(sclient)
+	serr := commons.CheckRedisClientConnect(sClient)
 	terr := commons.CheckRedisClientConnect(tclient)
 	if serr != nil {
 		cmd.PrintErrln(serr)
@@ -250,7 +250,7 @@ func parametersCommandFunc(cmd *cobra.Command, args []string) {
 	}
 
 	ce := &compare.CompoareEnvironment{
-		Sclinet: sclient,
+		Sclinet: sClient,
 		Tclient: tclient,
 	}
 
@@ -262,7 +262,7 @@ func parametersCommandFunc(cmd *cobra.Command, args []string) {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
-	data := [][]string{}
+	var data [][]string
 	for _, k := range keys {
 		line := []string{
 			k, m[k][0], m[k][1],
@@ -274,7 +274,7 @@ func parametersCommandFunc(cmd *cobra.Command, args []string) {
 	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
 	table.SetColWidth(12)
-	table.SetHeader([]string{"Parameters", sclient.Options().Addr, tclient.Options().Addr})
+	table.SetHeader([]string{"Parameters", sClient.Options().Addr, tclient.Options().Addr})
 	//table.SetBorder(false)
 	table.AppendBulk(data)
 	table.Render()
@@ -310,11 +310,11 @@ func single2singleCommandFunc(cmd *cobra.Command, args []string) {
 		Tdb:             tdb,
 		BatchSize:       batchsize,
 		Threads:         threas,
-		TTLdiff:         ttldiff,
+		TTLDiff:         ttldiff,
 		CompareTimes:    comparetimes,
 		CompareInterval: compareinterval,
 		Report:          report,
-		Scenario:        Scenario_single2single,
+		Scenario:        ScenarioSingle2single,
 	}
 
 	zaplogger.Sugar().Info(rc)
@@ -354,11 +354,11 @@ func multisingle2singleCommandFunc(cmd *cobra.Command, args []string) {
 		Tdb:             tdb,
 		BatchSize:       batchsize,
 		Threads:         threas,
-		TTLdiff:         ttldiff,
+		TTLDiff:         ttldiff,
 		CompareTimes:    comparetimes,
 		CompareInterval: compareinterval,
 		Report:          report,
-		Scenario:        Scenario_multisingle2single,
+		Scenario:        ScenarioMultiSingle2single,
 	}
 
 	err := rc.MultiSingle2Single()
@@ -397,11 +397,11 @@ func single2clusterCommandFunc(cmd *cobra.Command, args []string) {
 		//Tdb:          tdb,
 		BatchSize:       batchsize,
 		Threads:         threas,
-		TTLdiff:         ttldiff,
+		TTLDiff:         ttldiff,
 		CompareTimes:    comparetimes,
 		CompareInterval: compareinterval,
 		Report:          report,
-		Scenario:        Scenario_single2cluster,
+		Scenario:        ScenarioSingle2cluster,
 	}
 
 	err := rc.Single2Cluster()
@@ -425,7 +425,7 @@ func cluster2clusterCommandFunc(cmd *cobra.Command, args []string) {
 	report, _ := cmd.Flags().GetBool("report")
 
 	saddrs := strings.Split(saddr, ",")
-	saddrstructs := []SAddr{}
+	var saddrstructs []SAddr
 
 	for _, v := range saddrs {
 		saddr := SAddr{
@@ -444,11 +444,11 @@ func cluster2clusterCommandFunc(cmd *cobra.Command, args []string) {
 		//Tdb:          tdb,
 		BatchSize:       batchsize,
 		Threads:         threas,
-		TTLdiff:         ttldiff,
+		TTLDiff:         ttldiff,
 		CompareTimes:    comparetimes,
 		CompareInterval: compareinterval,
 		Report:          report,
-		Scenario:        Scenario_cluster2cluster,
+		Scenario:        ScenarioCluster2cluster,
 	}
 	execerr := rc.Cluster2Cluster()
 	if execerr != nil {
@@ -458,15 +458,15 @@ func cluster2clusterCommandFunc(cmd *cobra.Command, args []string) {
 
 func (rc *RedisCompare) Execute() error {
 	switch rc.Scenario {
-	case Scenario_single2single:
+	case ScenarioSingle2single:
 		return rc.Single2Single()
-	case Scenario_single2cluster:
+	case ScenarioSingle2cluster:
 		return rc.Single2Cluster()
-	case Scenario_cluster2cluster:
+	case ScenarioCluster2cluster:
 		return rc.Cluster2Cluster()
-	case Scenario_multisingle2single:
+	case ScenarioMultiSingle2single:
 		return rc.MultiSingle2Single()
-	case Scenario_multisingle2cluster:
+	case ScenarioMultiSingle2cluster:
 		return rc.MultiSingle2Cluster()
 	default:
 		return errors.New("Scenario not exists")
@@ -531,7 +531,7 @@ func (rc *RedisCompare) Single2Single() error {
 		Source:         sclient,
 		Target:         tclient,
 		BatchSize:      int64(rc.BatchSize),
-		TTLDiff:        float64(rc.TTLdiff),
+		TTLDiff:        float64(rc.TTLDiff),
 		RecordResult:   true,
 		CompareThreads: rc.Threads,
 	}
@@ -620,7 +620,7 @@ func (rc *RedisCompare) Single2Cluster() error {
 		Source:         sclient,
 		Target:         tclient,
 		BatchSize:      int64(rc.BatchSize),
-		TTLDiff:        float64(rc.TTLdiff),
+		TTLDiff:        float64(rc.TTLDiff),
 		RecordResult:   true,
 		CompareThreads: rc.Threads,
 	}
@@ -710,14 +710,14 @@ func (rc *RedisCompare) MultiSingle2Single() error {
 		}
 	}
 
-	resultfiles := []string{}
+	var resultfiles []string
 	var compares []interface{}
 	for _, v := range sclients {
 		compare := &compare.CompareSingle2Single{
 			Source:         v,
 			Target:         tclient,
 			BatchSize:      int64(rc.BatchSize),
-			TTLDiff:        float64(rc.TTLdiff),
+			TTLDiff:        float64(rc.TTLDiff),
 			RecordResult:   true,
 			CompareThreads: rc.Threads,
 		}
@@ -817,7 +817,7 @@ func (rc *RedisCompare) MultiSingle2Cluster() error {
 		}
 	}
 
-	resultfiles := []string{}
+	var resultfiles []string
 	//compares := []*compare.CompareSingle2Cluster{}
 	var compares []interface{}
 	for _, v := range sclients {
@@ -825,7 +825,7 @@ func (rc *RedisCompare) MultiSingle2Cluster() error {
 			Source:         v,
 			Target:         tclient,
 			BatchSize:      int64(rc.BatchSize),
-			TTLDiff:        float64(rc.TTLdiff),
+			TTLDiff:        float64(rc.TTLDiff),
 			RecordResult:   true,
 			CompareThreads: rc.Threads,
 		}
@@ -923,14 +923,14 @@ func (rc *RedisCompare) Cluster2Cluster() error {
 		}
 	}
 
-	resultfiles := []string{}
+	var resultfiles []string
 	var compares []interface{}
 	for _, v := range sclients {
 		compare := &compare.CompareSingle2Cluster{
 			Source:         v,
 			Target:         tclient,
 			BatchSize:      int64(rc.BatchSize),
-			TTLDiff:        float64(rc.TTLdiff),
+			TTLDiff:        float64(rc.TTLDiff),
 			RecordResult:   true,
 			CompareThreads: rc.Threads,
 		}
@@ -968,10 +968,11 @@ func GenReport(resultfiles []string, compares []interface{}) error {
 	commons.AppendLineToFile(bytes.NewBuffer(jsonBytes), reportfile)
 	for _, v := range resultfiles {
 		fi, err := os.Open(v)
+		defer fi.Close()
 		if err != nil {
 			return err
 		}
-		defer fi.Close()
+
 		scanner := bufio.NewScanner(fi)
 		for scanner.Scan() {
 			line := scanner.Text()
