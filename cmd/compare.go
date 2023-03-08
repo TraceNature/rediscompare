@@ -4,20 +4,22 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
-	"github.com/ghodss/yaml"
-	"github.com/go-redis/redis/v7"
-	"github.com/olekukonko/tablewriter"
-	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"rediscompare/commons"
 	"rediscompare/compare"
 	"rediscompare/globalzap"
+	"runtime"
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/ghodss/yaml"
+	"github.com/go-redis/redis/v7"
+	"github.com/olekukonko/tablewriter"
+	"github.com/pkg/errors"
+	"github.com/spf13/cobra"
 )
 
 var zaplogger = globalzap.GetLogger()
@@ -28,6 +30,7 @@ const (
 	ScenarioMultiSingle2single  = "multisingle2single"
 	ScenarioMultiSingle2cluster = "multisingle2cluster"
 	ScenarioCluster2cluster     = "cluster2cluster"
+	ScenarioDfSingle2single     = "dfsingle2single"
 )
 
 type SAddr struct {
@@ -63,6 +66,7 @@ func NewCompareCommand() *cobra.Command {
 	compare.AddCommand(NewSingle2ClusterCommand())
 	compare.AddCommand(NewCluster2ClusterCommand())
 	compare.AddCommand(NewMultiSingle2SingleCommand())
+	compare.AddCommand(NewDfSingle2single())
 	//compare.AddCommand(NewMultiSingle2ClusterCommand())
 	return compare
 }
@@ -115,6 +119,25 @@ func NewSingle2SingleCommand() *cobra.Command {
 	sc.Flags().Bool("report", false, "whether generate report default is false")
 	return sc
 
+}
+
+func NewDfSingle2single() *cobra.Command {
+	sc := &cobra.Command{
+		Use:   "dfsingle2single ",
+		Short: "compare single instance dragonfly",
+		Run:   dfsingle2singleCommandFunc,
+	}
+
+	sc.Flags().String("saddr", "127.0.0.1:6379", "Source redis address default is 127.0.0.1:6379")
+	sc.Flags().String("taddr", "127.0.0.1:6379", "Target redis address default is 127.0.0.1:6379")
+	sc.Flags().String("spassword", "", "Source redis password")
+	sc.Flags().String("tpassword", "", "Target redis password")
+	sc.Flags().Int("sdb", 0, "Source redis DB number default is 0")
+	sc.Flags().Int("tdb", 0, "Source redis DB number default is 0")
+	sc.Flags().Int("batchsize", 1000, "Compare List、Set、Zset type batch default is 50")
+	sc.Flags().Int("threads", 0, "Compare threads default is cpu core number")
+	sc.Flags().Bool("report", false, "whether generate report default is false")
+	return sc
 }
 
 func NewSingle2ClusterCommand() *cobra.Command {
@@ -324,6 +347,43 @@ func single2singleCommandFunc(cmd *cobra.Command, args []string) {
 	}
 }
 
+func dfsingle2singleCommandFunc(cmd *cobra.Command, args []string) {
+	saddr, _ := cmd.Flags().GetString("saddr")
+	taddr, _ := cmd.Flags().GetString("taddr")
+	spassword, _ := cmd.Flags().GetString("spassword")
+	tpassword, _ := cmd.Flags().GetString("tpassword")
+	sdb, _ := cmd.Flags().GetInt("sdb")
+	tdb, _ := cmd.Flags().GetInt("tdb")
+	batchsize, _ := cmd.Flags().GetInt("batchsize")
+	threas, _ := cmd.Flags().GetInt("threads")
+	report, _ := cmd.Flags().GetBool("report")
+
+	saddrstruct := SAddr{
+		Addr:     saddr,
+		Password: spassword,
+		Dbs:      []int{sdb},
+	}
+
+	rc := RedisCompare{
+		Saddr:     []SAddr{saddrstruct},
+		Taddr:     taddr,
+		Spassword: spassword,
+		Tpassword: tpassword,
+		Sdb:       sdb,
+		Tdb:       tdb,
+		BatchSize: batchsize,
+		Threads:   threas,
+		Report:    report,
+		Scenario:  ScenarioSingle2single,
+	}
+
+	zaplogger.Sugar().Info(rc)
+	err := rc.DfSingle2Single()
+	if err != nil {
+		cmd.PrintErrln(err)
+	}
+}
+
 func multisingle2singleCommandFunc(cmd *cobra.Command, args []string) {
 
 	saddr, _ := cmd.Flags().GetString("saddr")
@@ -468,6 +528,8 @@ func (rc *RedisCompare) Execute() error {
 		return rc.MultiSingle2Single()
 	case ScenarioMultiSingle2cluster:
 		return rc.MultiSingle2Cluster()
+	case ScenarioDfSingle2single:
+		return rc.DfSingle2Single()
 	default:
 		return errors.New("Scenario not exists")
 	}
@@ -546,6 +608,94 @@ func (rc *RedisCompare) Single2Single() error {
 	comparemap, _ := commons.Struct2Map(compare)
 	comparemap["Source"] = compare.Source.Options().Addr
 	comparemap["Target"] = compare.Target.Options().Addr
+	compares = append(compares, comparemap)
+
+	//生成报告
+	if rc.Report {
+		GenReport([]string{compare.ResultFile}, compares)
+	}
+	return nil
+}
+
+func (rc *RedisCompare) DfSingle2Single() error {
+	if len(rc.Saddr) == 0 {
+		return errors.New("No saddrs")
+	}
+
+	if rc.Threads == 0 {
+		rc.Threads = runtime.NumCPU()
+	}
+
+	if rc.BatchSize <= 0 {
+		rc.BatchSize = 10
+	}
+
+	saddr := rc.Saddr[0]
+
+	sopt := &redis.Options{
+		Addr: saddr.Addr,
+		DB:   saddr.Dbs[0],
+	}
+
+	if saddr.Password != "" {
+		sopt.Password = saddr.Password
+	}
+
+	sclients := []*redis.Client{}
+	tclients := []*redis.Client{}
+
+	zaplogger.Sugar().Info("Starting connecting to client")
+	for i := 0; i < rc.Threads; i++ {
+		zaplogger.Sugar().Info("Creating connection number: ", i)
+		sclient := commons.GetGoRedisClient(sopt)
+
+		topt := &redis.Options{
+			Addr: rc.Taddr,
+			DB:   rc.Tdb,
+		}
+
+		if rc.Tpassword != "" {
+			topt.Password = rc.Tpassword
+		}
+
+		tclient := commons.GetGoRedisClient(topt)
+
+		defer sclient.Close()
+		defer tclient.Close()
+
+		sconnerr := commons.CheckRedisClientConnect(sclient)
+		if sconnerr != nil {
+			return errors.New(sclient.Options().Addr + " " + sconnerr.Error())
+		}
+
+		tconnerr := commons.CheckRedisClientConnect(tclient)
+		if tconnerr != nil {
+			return errors.New(tclient.Options().Addr + " " + tconnerr.Error())
+		}
+		sclients = append(sclients, sclient)
+		tclients = append(tclients, tclient)
+	}
+
+	files, _ := filepath.Glob("*.result")
+	for _, f := range files {
+		if err := os.Remove(f); err != nil {
+			panic(err)
+		}
+	}
+
+	compare := &compare.CompareDfSingle2Single{
+		Source:         sclients,
+		Target:         tclients,
+		BatchSize:      int64(rc.BatchSize),
+		RecordResult:   true,
+		CompareThreads: rc.Threads,
+	}
+	var compares []interface{}
+	compare.CompareDB()
+
+	comparemap, _ := commons.Struct2Map(compare)
+	comparemap["Source"] = rc.Saddr
+	comparemap["Target"] = rc.Taddr
 	compares = append(compares, comparemap)
 
 	//生成报告
